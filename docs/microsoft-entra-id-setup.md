@@ -71,7 +71,7 @@ here to add a URI. Missing one just makes Microsoft show a
 
 - Email+password sign-up/login/verification/password-reset keep working
   exactly as before — this is an *additional* sign-in option, not a
-  replacement (see `MIGRATION.md` if that ever needs revisiting).
+  replacement.
 - A student who signs in with Microsoft still gets a normal row in this
   project's own `users` table (created on their first Microsoft sign-in --
   see the `jwt` callback in `src/auth.ts`), so lists and tasks work exactly
