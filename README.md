@@ -150,77 +150,69 @@ también puede correr en el Edge Runtime, usada por el middleware) y
 `middleware.ts` (bloquea el acceso a `/dashboard` si no has iniciado
 sesión).
 
-## Cómo añadir una funcionalidad nueva (ejemplo paso a paso)
+## Cómo añadir una funcionalidad nueva (vibe coding)
 
-Vamos a añadir un campo opcional de **emoji** a cada lista (por ejemplo 📚
-para "Estudios"), para que veas cómo se conecta una funcionalidad nueva de
-principio a fin: base de datos → validación → Server Action → interfaz.
+Aquí es donde este proyecto se aparta del desarrollo "tradicional": **no vas a
+escribir el código de una funcionalidad nueva a mano, archivo por archivo.**
+Vas a describírsela a tu asistente de IA (Claude Code, Cursor, o el que
+uses, con este repo abierto) y dejar que él haga el cambio de principio a
+fin — base de datos, validación, Server Action e interfaz. Eso es "vibe
+coding": tú decides *qué* quieres ver funcionando, el asistente decide *cómo*
+escribirlo, y tú revisas el resultado.
 
-1. **Añade la columna en la base de datos.** Abre `src/db/schema.ts` y
-   añade una línea nueva dentro de la tabla `lists` (junto a `description`,
-   por ejemplo):
-   ```ts
-   emoji: text("emoji"),
-   ```
-   Al no tener `.notNull()`, la columna es opcional: las listas que ya
-   existían simplemente tendrán `emoji = null`.
+Dos cosas hacen que esto funcione bien en esta plantilla:
 
-2. **Sincroniza el cambio con Neon:**
-   ```bash
-   npm run db:push
-   ```
-   `drizzle-kit` compara `src/db/schema.ts` con las tablas reales de tu base
-   de datos y añade la columna que falta.
+- El archivo [`CLAUDE.md`](CLAUDE.md) documenta las convenciones del
+  proyecto (dónde van los esquemas, las Server Actions, cómo se valida con
+  Zod, el reparto de `auth.ts`/`auth.config.ts`...). Herramientas como
+  Claude Code lo leen automáticamente antes de tocar código, así que no
+  tienes que repetir esas reglas en cada prompt.
+- Un buen prompt de vibe coding es **concreto**: describe lo que quieres ver
+  en la pantalla, dice en qué tabla o página afecta si lo sabes, y pide que
+  se compruebe el resultado al final. Un prompt vago ("añade un campo a las
+  listas") obliga al asistente a adivinar, y adivinar es donde aparecen los
+  errores.
 
-3. **Añade el campo al esquema de Zod** en `src/lib/validations.ts`, dentro
-   de `createListSchema`:
-   ```ts
-   emoji: z.string().max(4, "Usa como mucho un emoji").optional(),
-   ```
-   Como `updateListSchema` está definido como `createListSchema.partial()`,
-   hereda el campo nuevo automáticamente — no hay que tocar nada más ahí.
+### Ejemplo: añadir un emoji a cada lista
 
-4. **Revisa `src/actions/create-list.ts` y `src/actions/update-list.ts`.**
-   Aquí viene la buena noticia: ambos construyen los datos a guardar con
-   `...parsed.data` (en `create-list.ts`) y `...fields` (en
-   `update-list.ts`), es decir, copian *todos* los campos que Zod validó.
-   En cuanto el campo existe en el esquema del paso 3, ya viaja solo hasta
-   la base de datos — **no hace falta cambiar ni una línea de estos dos
-   archivos.**
+Copia y adapta un prompt como este:
 
-5. **Añade un input para el emoji en los formularios:**
-   - En `src/components/lists/create-list-dialog.tsx`: añade un `<Field>`
-     con un `<Input name="emoji" placeholder="📚" maxLength={4} />`, y añade
-     `emoji: optionalFormValue(formData.get("emoji"))` al objeto que se
-     envía a `createList(...)`.
-   - En `src/components/lists/edit-list-dialog.tsx`: lo mismo, pero con
-     `defaultValue={list.emoji ?? ""}` para precargar el valor actual, y
-     añadiendo `emoji: optionalFormValue(formData.get("emoji"))` a la
-     llamada a `updateList(...)`.
+> Quiero añadir un campo opcional de emoji a las listas (por ejemplo 📚 para
+> "Estudios"). Debe poder rellenarse al crear o editar una lista, guardarse
+> en la base de datos, y mostrarse junto al nombre tanto en la pantalla
+> "Mis listas" como en el detalle de una lista. Sigue las convenciones de
+> CLAUDE.md. Cuando termines, ejecuta `npm run lint` y `npm run build` y
+> arregla lo que falle antes de darlo por terminado.
 
-6. **Muéstralo junto al nombre de la lista** en
-   `src/components/lists/list-card.tsx`, dentro del `<CardTitle>`, por
-   ejemplo justo antes del `<Link>` con el nombre:
-   ```tsx
-   {list.emoji && <span aria-hidden>{list.emoji}</span>}
-   ```
-   `list` ya tiene el tipo `List` (definido en `src/lib/types.ts` como
-   `typeof lists.$inferSelect`), así que en cuanto añadiste la columna en el
-   paso 1, TypeScript ya sabe que `list.emoji` existe — no hace falta tocar
-   `types.ts`.
+Con ese prompt, un asistente que conozca el proyecto va a tocar —sin que se
+lo tengas que deletrear campo por campo— más o menos esto:
 
-7. **Un detalle fácil de olvidar:** `src/app/dashboard/page.tsx` no hace
-   "traer todas las columnas" — construye a mano el objeto de columnas que
-   pide, para poder añadir los contadores de tareas (`taskCount`,
-   `completedCount`) con un `LEFT JOIN`. La página de detalle de una lista
-   (`src/app/dashboard/lists/[id]/page.tsx`) sí trae el emoji automáticamente
-   porque usa `db.query.lists.findFirst(...)` (trae todas las columnas). Si
-   quieres que el emoji también se vea en la pantalla "Mis listas", añade
-   también `emoji: lists.emoji,` al `select({ ... })` de
-   `src/app/dashboard/page.tsx`.
+- `src/db/schema.ts`: la columna nueva en la tabla `lists`, y ejecutará
+  `npm run db:push` para sincronizarla con Neon.
+- `src/lib/validations.ts`: el campo en el esquema de Zod de crear/editar
+  lista.
+- `src/actions/create-list.ts` / `update-list.ts`: normalmente sin cambios,
+  porque ya copian todos los campos que Zod valida.
+- `src/components/lists/create-list-dialog.tsx` / `edit-list-dialog.tsx`: el
+  input nuevo en el formulario.
+- `src/components/lists/list-card.tsx` y
+  `src/app/dashboard/lists/[id]/page.tsx`: dónde se muestra el emoji.
 
-8. Prueba a crear o editar una lista con un emoji y comprueba que aparece
-   donde esperas. ¡Ya has añadido tu primera funcionalidad end-to-end!
+No necesitas memorizar esta lista de antemano — te sirve para *revisar*
+después el diff que te proponga el asistente y comprobar que no se ha
+olvidado ningún sitio, no para ir tú archivo por archivo.
+
+### Cómo escribir buenos prompts
+
+- Describe el comportamiento que quieres ver, no la implementación ("que se
+  vea el emoji junto al nombre", no "añade una columna text nullable").
+- Si sabes qué tabla o pantalla afecta, dilo — te ahorras una vuelta de
+  "¿dónde está esto exactamente?".
+- Pide siempre que compruebe el resultado (`npm run lint`, `npm run build`)
+  antes de considerar terminada la tarea.
+- Si el resultado no es el que esperabas, no lo arregles tú a mano: explícale
+  qué está mal y deja que lo corrija él. Es más rápido, y así aprendes qué
+  hizo falta aclarar para el siguiente prompt.
 
 ## Errores comunes
 
