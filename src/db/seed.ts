@@ -13,12 +13,12 @@
 // but it means you should never point DATABASE_URL at a database with real
 // user data you care about when running this script.
 
-import { config } from "dotenv";
-
 // tsx runs this file directly with `node`, not through Next.js, so (just
 // like drizzle.config.ts) we have to load ".env.local" ourselves to get
-// DATABASE_URL into process.env before "./index" reads it.
-config({ path: ".env.local" });
+// DATABASE_URL into process.env before "./index" reads it. This MUST be the
+// first import in the file -- see load-env.ts for why a plain `config(...)`
+// call placed between imports doesn't work.
+import "./load-env";
 
 import { eq } from "drizzle-orm";
 
