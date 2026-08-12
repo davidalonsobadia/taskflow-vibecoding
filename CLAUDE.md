@@ -146,6 +146,18 @@ exactly this reason — guard against `null` before `bcryptjs.compare`. Setup fo
 admin (registering the Azure app, redirect URIs) lives in
 `docs/microsoft-entra-id-setup.md`, not here — students never touch Azure.
 
+**Sending email (Resend) is also optional** — see `resendEnabled` in `src/lib/email.ts`.
+Every `send*` function there becomes a no-op when `RESEND_API_KEY` isn't set, and the
+Server Actions that call them change behavior accordingly rather than just silently
+failing: `register.ts` inserts the new user with `isVerified: true` and skips the
+verification email entirely (there'd be no way to deliver the link anyway); the login
+page hides the "forgot password" link (`forgotPasswordEnabled` prop, computed
+server-side in `src/app/(auth)/login/page.tsx`), and `forgot-password.ts` short-circuits
+without touching the database if reached directly anyway. When adding a new place that
+needs to send email, follow the same shape: check `resendEnabled` (or let the `send*`
+no-op do it for you) and give the *feature* a sensible disabled behavior, not just a
+silently-swallowed email.
+
 ## 6. Design references for UI issues
 
 When a task should match a specific visual design (a mockup, screenshot, PDF spec, or
