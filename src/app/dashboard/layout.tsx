@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { auth } from "@/auth";
 import { logout } from "@/actions/logout";
 
@@ -35,6 +36,7 @@ export default async function DashboardLayout({
           <span className="hidden text-sm text-muted-foreground sm:inline">
             {session.user.name} ({session.user.email})
           </span>
+          <ThemeToggle />
           <form action={logoutAndRedirect}>
             <Button type="submit" variant="outline" size="sm">
               Cerrar sesión
