@@ -13,15 +13,15 @@ artifacts in English.
 **One deliberate exception**: this project's audience is Spanish-speaking beginner
 students, so **user-facing copy actually rendered in the UI** — labels, buttons, form
 placeholders, toast/error messages, empty states, and `README.md` itself — is written
-in **Spanish**. Everything else (code, identifiers, comments, `MIGRATION.md`, commit
-messages, PR text) stays in English. When in doubt: if a string is read by the app's
-end user inside the browser, it's Spanish; if it's read by a developer, it's English.
+in **Spanish**. Everything else (code, identifiers, comments, commit messages, PR text)
+stays in English. When in doubt: if a string is read by the app's end user inside the
+browser, it's Spanish; if it's read by a developer, it's English.
 
 ## 1. Project overview
 
-TaskFlow is a task/list manager built as a **single Next.js project** — there is no
-separate backend process. It exists to teach beginners the full "vibe coding" loop:
-clone a repo, wire up a database, and ship to production, using only `git` and `npm`.
+TaskFlow is a task/list manager built entirely as **one Next.js project**. It exists
+to teach beginners the full "vibe coding" loop: clone a repo, wire up a database, and
+ship to production, using only `git` and `npm`.
 
 - **Next.js 15** (App Router, `src/` directory convention), **React 19**,
   **TypeScript** in strict mode.
@@ -35,13 +35,8 @@ clone a repo, wire up a database, and ship to production, using only `git` and `
   database adapter, no OAuth) for login/session.
 - **Resend** sends the two transactional emails the app needs (email verification,
   password reset).
-- **Vercel** is the only deploy target. There is no Docker, no docker-compose, no
-  CORS configuration, and no job queue (Celery/Redis) anywhere in this project — a
-  Server Action that needs to send one email just `await`s it inline.
-
-See `MIGRATION.md` for the full map of what this project used to be (a FastAPI +
-Postgres + Docker Compose monorepo) and where each piece of that ended up, plus the
-list of features that were deliberately dropped rather than carried over.
+- **Vercel** is the only deploy target — a Server Action that needs to send one email
+  just `await`s it inline, on demand, with nothing to provision or keep running.
 
 ## 2. Commands
 

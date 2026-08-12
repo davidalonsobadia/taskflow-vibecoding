@@ -37,8 +37,8 @@ Cada pieza del proyecto tiene un trabajo muy concreto:
   pueda abrirlo en internet, sin que tengas que mantener un servidor tú
   mismo/a.
 
-No hay Docker, ni un backend separado, ni colas de tareas (Celery/Redis): al
-ser "serverless", todo esto corre bajo demanda en Vercel y en Neon.
+Todo funciona en modo "serverless": no hay nada que instalar ni mantener
+corriendo tú — se ejecuta bajo demanda en Vercel y en Neon.
 
 ## Cómo ponerlo en marcha en tu ordenador
 
