@@ -1,3 +1,5 @@
+import { resendEnabled } from "@/lib/email";
+
 import { LoginForm } from "./login-form";
 
 export default function LoginPage() {
@@ -10,5 +12,13 @@ export default function LoginPage() {
       process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET
   );
 
-  return <LoginForm microsoftEnabled={microsoftEnabled} />;
+  return (
+    <LoginForm
+      microsoftEnabled={microsoftEnabled}
+      // "Forgot password" needs an email provider to actually deliver a
+      // reset link -- without Resend configured, hide it instead of
+      // offering a dead end. See src/lib/email.ts.
+      forgotPasswordEnabled={resendEnabled}
+    />
+  );
 }

@@ -30,8 +30,9 @@ Cada pieza del proyecto tiene un trabajo muy concreto:
   de tu propio proyecto.
 - **Auth.js** — gestiona el inicio de sesión: guarda quién eres en una
   cookie segura y te dice, en cualquier página, si hay alguien conectado.
-- **Resend** — el servicio que envía los emails reales de la app (verificar
-  tu cuenta, recuperar la contraseña).
+- **Resend** (opcional) — si lo configuras, envía los emails reales de la
+  app (verificar tu cuenta, recuperar la contraseña). Sin él, la app
+  funciona igual, solo que sin esos dos correos.
 - **Vercel** — la plataforma donde subes tu proyecto para que cualquiera
   pueda abrirlo en internet, sin que tengas que mantener un servidor tú
   mismo/a.
@@ -68,10 +69,14 @@ recomendada, `20.20.2`, si usas `nvm`).
    cp .env.example .env.local
    ```
    y rellena la línea `DATABASE_URL=` con tu connection string real.
-6. **Crea una cuenta en Resend** ([resend.com](https://resend.com)) y copia
-   tu API key también a `.env.local`, en la línea `RESEND_API_KEY=`. Para
+6. *(Opcional)* **Crea una cuenta en Resend** ([resend.com](https://resend.com))
+   y copia tu API key a `.env.local`, en la línea `RESEND_API_KEY=`. Para
    probar en local puedes dejar `RESEND_FROM_EMAIL=onboarding@resend.dev`
-   tal cual — funciona sin verificar ningún dominio propio.
+   tal cual — funciona sin verificar ningún dominio propio. **Si te la
+   saltas** (dejas `RESEND_API_KEY` en blanco), la app funciona igual: las
+   cuentas nuevas quedan verificadas al momento en vez de por email, y el
+   enlace "¿Olvidaste tu contraseña?" se oculta (sin un proveedor de email
+   no hay forma de enviarte el enlace para recuperarla).
 7. **Genera un `AUTH_SECRET`** (el secreto que usa Auth.js para firmar las
    sesiones) y pégalo también en `.env.local`:
    ```bash
@@ -119,7 +124,7 @@ configurarlo está en
 
 ## Cómo desplegarlo en Vercel
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fdavidalonsobadia%2Ftaskflow-vibecoding&project-name=taskflow&env=AUTH_SECRET,RESEND_API_KEY,RESEND_FROM_EMAIL&envDescription=Variables%20de%20entorno%20necesarias%20(DATABASE_URL%20la%20anade%20la%20integracion%20de%20Neon%20automaticamente))
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fdavidalonsobadia%2Ftaskflow-vibecoding&project-name=taskflow&env=AUTH_SECRET&envDescription=DATABASE_URL%20la%20anade%20la%20integracion%20de%20Neon%20automaticamente.%20RESEND_%2A%20y%20AUTH_MICROSOFT_%2A%20son%20opcionales%2C%20a%C3%B1adelas%20despu%C3%A9s%20si%20las%20necesitas)
 
 Puedes pulsar el botón de arriba, o seguir los pasos manualmente:
 
@@ -131,9 +136,11 @@ Puedes pulsar el botón de arriba, o seguir los pasos manualmente:
    configura la variable `DATABASE_URL` automáticamente por ti — no hace
    falta que la escribas a mano.
 4. **Añade el resto de variables de entorno a mano**: en
-   *Project Settings → Environment Variables*, añade `AUTH_SECRET`,
-   `RESEND_API_KEY` y `RESEND_FROM_EMAIL` (los mismos valores que ya tienes
-   en tu `.env.local`, o unos nuevos para producción).
+   *Project Settings → Environment Variables*, añade `AUTH_SECRET` (el
+   mismo valor que ya tienes en tu `.env.local`, o uno nuevo para
+   producción). Si configuraste Resend, añade también `RESEND_API_KEY` y
+   `RESEND_FROM_EMAIL` — si no, déjalas fuera, la app funciona igual sin
+   ellas.
 5. Pulsa **Deploy** y espera a que termine el build.
 
 Nota: `NEXT_PUBLIC_APP_URL` no se necesita en Vercel — el propio código

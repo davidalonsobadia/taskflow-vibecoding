@@ -47,8 +47,10 @@ function MicrosoftLogo() {
 
 export function LoginForm({
   microsoftEnabled,
+  forgotPasswordEnabled,
 }: {
   microsoftEnabled: boolean;
+  forgotPasswordEnabled: boolean;
 }) {
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(loginAction, null);
@@ -129,12 +131,14 @@ export function LoginForm({
               Regístrate
             </Link>
           </p>
-          <Link
-            href="/forgot-password"
-            className="text-muted-foreground underline underline-offset-4"
-          >
-            ¿Olvidaste tu contraseña?
-          </Link>
+          {forgotPasswordEnabled ? (
+            <Link
+              href="/forgot-password"
+              className="text-muted-foreground underline underline-offset-4"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          ) : null}
         </CardFooter>
       </Card>
     </main>

@@ -2,6 +2,16 @@ import { Resend } from "resend";
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL;
 
+// Sending emails is entirely OPTIONAL -- Resend costs nothing to try, but a
+// student shouldn't have to sign up for it just to run this template. When
+// RESEND_API_KEY isn't set, every send* function below becomes a no-op
+// instead of failing, and the Server Actions that call them adapt their
+// behavior accordingly (see register.ts, forgot-password.ts): registration
+// auto-verifies the new user instead of emailing a verification link, and
+// the "forgot password" flow is hidden entirely (see src/app/(auth)/login)
+// since there would be no way to deliver a reset link anyway.
+export const resendEnabled = Boolean(process.env.RESEND_API_KEY);
+
 // Create the Resend client lazily, the first time an email is actually sent,
 // instead of at module load time. The Resend constructor throws if
 // RESEND_API_KEY is missing, and this file is imported (transitively, via the
@@ -35,6 +45,9 @@ export async function sendVerificationEmail(
   to: string,
   token: string,
 ): Promise<void> {
+  if (!resendEnabled) {
+    return;
+  }
   const link = `${getBaseUrl()}/verify-email?token=${token}`;
 
   await getResendClient().emails.send({
@@ -54,6 +67,9 @@ export async function sendPasswordResetEmail(
   to: string,
   token: string,
 ): Promise<void> {
+  if (!resendEnabled) {
+    return;
+  }
   const link = `${getBaseUrl()}/reset-password?token=${token}`;
 
   await getResendClient().emails.send({
@@ -73,6 +89,9 @@ export async function sendWelcomeEmail(
   to: string,
   name: string,
 ): Promise<void> {
+  if (!resendEnabled) {
+    return;
+  }
   await getResendClient().emails.send({
     from: FROM_EMAIL!,
     to,

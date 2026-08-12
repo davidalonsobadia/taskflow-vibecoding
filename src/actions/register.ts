@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { sendVerificationEmail } from "@/lib/email";
+import { resendEnabled, sendVerificationEmail } from "@/lib/email";
 import { hashPassword } from "@/lib/password";
 import type { ActionResult } from "@/lib/types";
 import { registerSchema } from "@/lib/validations";
@@ -29,6 +29,24 @@ export async function register(input: unknown): Promise<ActionResult> {
   }
 
   const hashedPassword = await hashPassword(password);
+
+  // Without Resend configured, there's no way to deliver a verification
+  // link, so there's nothing to gate login on: verify the account right
+  // away instead of leaving it stuck in a state nobody can get out of.
+  if (!resendEnabled) {
+    await db.insert(users).values({
+      name,
+      email,
+      hashedPassword,
+      isVerified: true,
+    });
+
+    return {
+      success: true,
+      message: "Cuenta creada. Ya puedes iniciar sesión.",
+    };
+  }
+
   // A random token the user proves ownership of the email with, by clicking
   // the link we send to it.
   const verificationToken = randomBytes(32).toString("hex");
