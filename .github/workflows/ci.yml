@@ -47,3 +47,22 @@ jobs:
           RESEND_API_KEY: re_ci_placeholder
           RESEND_FROM_EMAIL: onboarding@resend.dev
         run: npm run build
+
+  secret-scan:
+    # Automated backstop for AGENTS.md #2 (never leave secrets in anything an agent
+    # produces): catches a hardcoded credential even if a prompt or an agent missed
+    # it. Runs independently of the build job so it still gates merges on its own.
+    name: secret scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history, not just the merge commit -- a secret committed and later
+          # removed in the same PR must still fail this check.
+          fetch-depth: 0
+
+      - name: Scan for leaked secrets (TruffleHog)
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --results=verified,unknown

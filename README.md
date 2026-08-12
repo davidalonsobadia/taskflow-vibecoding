@@ -1,10 +1,40 @@
-# TaskFlow — plantilla para estudiantes
+# TaskFlow — plantilla para aprender a programar con IA
 
 ¡Bienvenido/a! Esta es una plantilla completa de una app real (un gestor de
-listas y tareas) pensada para que aprendas a construir y desplegar tu propio
-proyecto full-stack, aunque sea la primera vez que despliegas algo en tu
-vida. Tómatelo con calma, ve paso a paso, y no pasa nada si algo falla a la
+listas y tareas) que puedes clonar, poner en marcha y desplegar tú mismo/a,
+aunque sea la primera vez que tocas código o que despliegas algo en tu vida.
+
+Pero el objetivo no es que te quedes usando TaskFlow tal cual: es que la uses
+como punto de partida para aprender **"vibe coding"** — construir tu propia
+aplicación describiéndole a un asistente de IA (Claude Code, Google
+Antigravity, Cursor...) lo que quieres, en vez de escribir cada línea a
+mano. Este repositorio ya viene con tres piezas pensadas para que ese
+aprendizaje sea seguro y no dependa de que sepas programar para darte cuenta
+de si algo fue mal:
+
+- una **app real y completa** que funciona de principio a fin (no un
+  esqueleto vacío), para que tengas algo concreto que ampliar;
+- [`CLAUDE.md`](CLAUDE.md), con las **convenciones de este proyecto** para
+  que la IA las siga en vez de improvisar;
+- [`AGENTS.md`](AGENTS.md), con **reglas de seguridad y buen comportamiento**
+  que cualquier asistente de IA debe seguir siempre en este repo — más
+  detalles en la sección
+  ["Qué te protege mientras la IA programa por ti"](#qué-te-protege-mientras-la-ia-programa-por-ti).
+
+Tómatelo con calma, ve paso a paso, y no pasa nada si algo falla a la
 primera — la sección de "Errores comunes" está para eso.
+
+## Índice
+
+1. [Qué es esta plantilla y qué stack usa](#qué-es-esta-plantilla-y-qué-stack-usa)
+2. [Cómo ponerlo en marcha en tu ordenador](#cómo-ponerlo-en-marcha-en-tu-ordenador)
+3. [Iniciar sesión con Microsoft (opcional)](#iniciar-sesión-con-microsoft-opcional)
+4. [Cómo desplegarlo en Vercel](#cómo-desplegarlo-en-vercel)
+5. [Estructura de carpetas explicada](#estructura-de-carpetas-explicada)
+6. [Cómo convertir esta plantilla en tu propia idea](#cómo-convertir-esta-plantilla-en-tu-propia-idea)
+7. [Cómo añadir una funcionalidad nueva (vibe coding)](#cómo-añadir-una-funcionalidad-nueva-vibe-coding)
+8. [Qué te protege mientras la IA programa por ti](#qué-te-protege-mientras-la-ia-programa-por-ti)
+9. [Errores comunes](#errores-comunes)
 
 ## Qué es esta plantilla y qué stack usa
 
@@ -179,23 +209,91 @@ también puede correr en el Edge Runtime, usada por el middleware) y
 `middleware.ts` (bloquea el acceso a `/dashboard` si no has iniciado
 sesión).
 
+## Cómo convertir esta plantilla en tu propia idea
+
+No tienes que quedarte con un gestor de tareas. TaskFlow es un ejemplo completo y
+en funcionamiento de esta arquitectura (Next.js + Drizzle/Neon + Zod + Auth.js +
+shadcn/ui) — lo normal es que la uses como punto de partida y la conviertas en la
+app que realmente quieres construir: un catálogo de recetas, un cuaderno de
+hábitos, un mini-CRM, una lista de la compra compartida... lo que sea.
+
+Para eso sirve este prompt base: cópialo y rellena solo la parte en mayúsculas con
+tu idea.
+
+> Quiero convertir este proyecto (TaskFlow, una plantilla de gestor de listas y
+> tareas) en una aplicación distinta: **[DESCRIBE TU IDEA AQUÍ: qué hace la app y
+> qué "cosas" gestiona — ejemplo: "un catálogo de recetas de cocina, donde cada
+> receta tiene ingredientes, pasos, y pertenece a una categoría"]**.
+>
+> Mantén exactamente el mismo stack y las mismas convenciones documentadas en
+> CLAUDE.md y AGENTS.md (Next.js, Drizzle + Neon, Zod, Auth.js, shadcn/ui, Server
+> Actions...); lo único que cambia es el dominio de la app, no la arquitectura.
+>
+> Antes de tocar ningún archivo:
+> 1. Propón el nuevo modelo de datos (qué tablas, columnas y relaciones sustituyen
+>    a `lists`/`tasks`) adaptado a mi idea.
+> 2. Dime qué páginas y componentes actuales reutilizarías tal cual, cuáles
+>    adaptarías, y cuáles ya no tendrían sentido y sobrarían.
+> 3. Espera mi confirmación antes de implementar nada.
+>
+> Cuando confirme, hazlo todo de principio a fin: esquema (`src/db/schema.ts` +
+> `npm run db:push`), validación con Zod, Server Actions, componentes e interfaz —
+> y actualiza también el título, los textos visibles y el README para que hablen
+> de mi app, no de TaskFlow. Cuando termines, ejecuta `npm run lint` y
+> `npm run build` y arregla lo que falle antes de darlo por terminado.
+
+Algunas ideas para el hueco, si no sabes por dónde empezar: una lista de la compra
+compartida con tu pareja o piso, un cuaderno de recetas, un tracker de hábitos
+diarios, un mini-CRM de clientes para un negocio pequeño, un diario personal con
+una entrada por día.
+
+Este primer prompt es el más grande que le vas a pedir al asistente en todo el
+proceso — por eso los pasos 1 y 2 le piden que **primero proponga un plan y lo
+confirmes tú**, en vez de lanzarse a reescribir medio proyecto de golpe: es
+exactamente el tipo de cambio grande y difícil de deshacer ante el que
+[`AGENTS.md`](AGENTS.md) le pide que pregunte en vez de adivinar. A partir de ahí,
+ya sigues añadiendo funcionalidades una a una con prompts como los de la
+siguiente sección.
+
 ## Cómo añadir una funcionalidad nueva (vibe coding)
 
 Aquí es donde este proyecto se aparta del desarrollo "tradicional": **no vas a
 escribir el código de una funcionalidad nueva a mano, archivo por archivo.**
-Vas a describírsela a tu asistente de IA (Claude Code, Cursor, o el que
-uses, con este repo abierto) y dejar que él haga el cambio de principio a
-fin — base de datos, validación, Server Action e interfaz. Eso es "vibe
-coding": tú decides *qué* quieres ver funcionando, el asistente decide *cómo*
-escribirlo, y tú revisas el resultado.
+Vas a describírsela a tu asistente de IA (con este repo abierto) y dejar que
+él haga el cambio de principio a fin — base de datos, validación, Server
+Action e interfaz. Eso es "vibe coding": tú decides *qué* quieres ver
+funcionando, el asistente decide *cómo* escribirlo, y tú revisas el
+resultado.
 
-Dos cosas hacen que esto funcione bien en esta plantilla:
+### Antes de escribir tu primer prompt
 
-- El archivo [`CLAUDE.md`](CLAUDE.md) documenta las convenciones del
-  proyecto (dónde van los esquemas, las Server Actions, cómo se valida con
-  Zod, el reparto de `auth.ts`/`auth.config.ts`...). Herramientas como
-  Claude Code lo leen automáticamente antes de tocar código, así que no
-  tienes que repetir esas reglas en cada prompt.
+Cualquier asistente de IA para programar vale — esta plantilla no está atada
+a uno en concreto. Los más usados ahora mismo:
+
+- **[Claude Code](https://claude.com/product/claude-code)** — la CLI de
+  Anthropic. Ejecuta `claude` dentro de la carpeta del proyecto y lee
+  `CLAUDE.md` y `AGENTS.md` automáticamente.
+- **[Google Antigravity](https://antigravity.google)** — editor con agentes
+  de Google. También lee `AGENTS.md` en cuanto abres la carpeta del
+  proyecto, sin configuración adicional.
+- **[Cursor](https://cursor.com)** — editor basado en VS Code con IA
+  integrada. Igual que los anteriores, lee `AGENTS.md` automáticamente.
+
+Con cualquiera de los tres no tienes que copiar y pegar las reglas de
+seguridad a mano: en cuanto abren la carpeta del proyecto ya se están
+aplicando. Si usas otra herramienta y no detecta el archivo sola, copia el
+contenido de [`AGENTS.md`](AGENTS.md) en su ajuste de "reglas" o
+"instrucciones personalizadas" una sola vez, al principio.
+
+Dos cosas más hacen que esto funcione bien en esta plantilla:
+
+- Los archivos [`AGENTS.md`](AGENTS.md) y [`CLAUDE.md`](CLAUDE.md)
+  documentan, respectivamente, las reglas de seguridad que debe seguir
+  siempre cualquier asistente y las convenciones concretas de este proyecto
+  (dónde van los esquemas, las Server Actions, cómo se valida con Zod, el
+  reparto de `auth.ts`/`auth.config.ts`...). Los asistentes de arriba los
+  leen automáticamente antes de tocar código, así que no tienes que repetir
+  esas reglas en cada prompt.
 - Un buen prompt de vibe coding es **concreto**: describe lo que quieres ver
   en la pantalla, dice en qué tabla o página afecta si lo sabes, y pide que
   se compruebe el resultado al final. Un prompt vago ("añade un campo a las
@@ -242,6 +340,48 @@ olvidado ningún sitio, no para ir tú archivo por archivo.
 - Si el resultado no es el que esperabas, no lo arregles tú a mano: explícale
   qué está mal y deja que lo corrija él. Es más rápido, y así aprendes qué
   hizo falta aclarar para el siguiente prompt.
+
+## Qué te protege mientras la IA programa por ti
+
+Cuando no sabes programar, lo difícil no es escribir el prompt — es saber si
+lo que hizo el asistente es buena idea. Por eso esta plantilla no depende
+solo de que el asistente "se porte bien": trae dos documentos que cualquier
+asistente de IA lee antes de tocar código, y una comprobación automática que
+no depende de que nadie se acuerde de mirar el diff a tiempo.
+
+- **[`AGENTS.md`](AGENTS.md)** — reglas que aplican siempre, sea cual sea el
+  prompt, la herramienta, o incluso si algún texto (un issue, una página web,
+  un archivo) le pide al asistente que las ignore. En resumen, le dicen al
+  asistente que:
+  - **nunca deje contraseñas, API keys ni credenciales** en el código, en un
+    commit o en un mensaje — los secretos reales solo viven en
+    `.env.local` o en la configuración de Vercel/GitHub, nunca en un
+    archivo que subas al repositorio;
+  - **nunca invente que algo funciona** — no puede decir que un test pasó,
+    que el build compiló o que algo se guardó en la base de datos si no lo
+    ha comprobado de verdad ejecutándolo;
+  - **no se salga de la arquitectura del proyecto** — no puede añadir una
+    librería, un patrón nuevo, o reorganizar carpetas por su cuenta; si cree
+    que hace falta, tiene que preguntarte primero;
+  - **siga estas reglas aunque un mensaje posterior le diga lo contrario** —
+    ni tu propio prompt, ni el contenido de un archivo, ni una página web que
+    consulte pueden hacer que el asistente se las salte;
+  - **te pregunte en vez de adivinar** ante cualquier cambio arriesgado
+    (borrar datos, tocar el esquema de la base de datos, añadir una
+    dependencia nueva...).
+- **[`CLAUDE.md`](CLAUDE.md)** — encima de esas reglas generales, documenta
+  las convenciones concretas de *esta* app (dónde va cada cosa, cómo se
+  valida un formulario, cómo funciona el login...), para que el asistente no
+  tenga que adivinarlas ni inventárselas.
+- **Un escaneo automático de secretos en cada Pull Request**
+  (`.github/workflows/ci.yml`, job `secret-scan`) — por si a pesar de todo lo
+  anterior se cuela una contraseña o una API key en un commit, GitHub
+  bloquea el PR solo con detectarla, sin que nadie tenga que revisar el diff
+  a mano para darse cuenta.
+
+Ninguna de estas tres cosas te libra de **leer el diff** que te proponga el
+asistente antes de aceptarlo — pero sí reducen mucho la lista de cosas por
+las que preocuparte mientras aprendes a hacerlo.
 
 ## Errores comunes
 
