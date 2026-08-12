@@ -1,4 +1,36 @@
-# OS Files
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# env files (.env.example is intentionally NOT ignored -- it documents the
+# required variables without real secrets)
+.env
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# OS files
 .DS_Store
 .DS_Store?
 ._*
@@ -7,8 +39,9 @@
 ehthumbs.db
 Thumbs.db
 Desktop.ini
+*.pem
 
-# Editor/IDE Files
+# Editor/IDE files
 .vscode/
 .idea/
 *.swp
@@ -20,72 +53,7 @@ Desktop.ini
 *.sublime-project
 *.sublime-workspace
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-.venv/
-venv/
-ENV/
-env/
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Node.js / Next.js
-node_modules/
-.next/
-out/
-.nuxt/
-dist/
-.cache/
-.parcel-cache/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-.pnpm-store/
-
-# Environment Variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env*.local
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-*.db-journal
-
 # Logs
-logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -93,36 +61,8 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Temporary Files
+# Temporary files
 *.tmp
 *.temp
 *.bak
 *.backup
-*.swp
-*.swo
-*~
-
-# Build artifacts
-*.pyc
-*.pyo
-*.pyd
-.coverage
-.nyc_output
-coverage/
-*.cover
-.hypothesis/
-
-# Docker
-.dockerignore
-
-# Misc
-*.pid
-*.seed
-*.pid.lock
-.cache
-.terraform/
-*.tfstate
-*.tfstate.*
-
-# Frontend source lib (Next.js) — must NOT be caught by the Python lib/ rule above
-!frontend/lib/
