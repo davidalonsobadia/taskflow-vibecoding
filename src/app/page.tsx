@@ -1,12 +1,16 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 // Landing page: a plain Server Component, no data fetching. Just a short
 // pitch and two buttons pointing to the auth pages.
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-10 bg-background p-8 text-center">
+    <main className="relative flex min-h-screen flex-col items-center justify-center gap-10 bg-background p-8 text-center">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="max-w-xl space-y-4">
         <h1 className="font-heading text-4xl font-semibold">TaskFlow</h1>
         <p className="text-lg text-muted-foreground">
