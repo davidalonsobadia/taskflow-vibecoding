@@ -18,7 +18,13 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  hashedPassword: text("hashed_password").notNull(),
+  // Nullable: a user created by signing in with Microsoft (see src/auth.ts)
+  // never sets a local password -- Microsoft already handled that. Only
+  // users who registered with email+password have one.
+  hashedPassword: text("hashed_password"),
+  // Always true for Microsoft sign-ins (Microsoft already verified the
+  // identity); for email+password users, true only after they click the
+  // verification link.
   isVerified: boolean("is_verified").notNull().default(false),
   // Nullable: only set while an email-verification or password-reset flow is
   // pending. Cleared once the flow completes.

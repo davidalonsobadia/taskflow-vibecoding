@@ -135,6 +135,17 @@ Auth is split across three files on purpose — **do not collapse them**:
 augmentations at the top of `src/auth.ts`) — `Number(session.user.id)` it before
 comparing to a Drizzle integer column.
 
+**Microsoft Entra ID** is a second, optional provider in `src/auth.ts`, registered only
+when `AUTH_MICROSOFT_ENTRA_ID_ID`/`_SECRET` are set (see `microsoftEntraIdEnabled`) —
+Credentials keeps working either way. There is no database adapter, so an OAuth
+sign-in never gets a `users` row for free: the `jwt` callback find-or-creates one by
+`email` on first sign-in via Microsoft, specifically so `token.id` ends up being our
+local `users.id` (a string) exactly like a Credentials sign-in, and every downstream
+Server Action/query stays provider-agnostic. `users.hashedPassword` is nullable for
+exactly this reason — guard against `null` before `bcryptjs.compare`. Setup for an org
+admin (registering the Azure app, redirect URIs) lives in
+`docs/microsoft-entra-id-setup.md`, not here — students never touch Azure.
+
 ## 6. Design references for UI issues
 
 When a task should match a specific visual design (a mockup, screenshot, PDF spec, or

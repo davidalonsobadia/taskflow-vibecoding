@@ -95,6 +95,28 @@ recomendada, `20.20.2`, si usas `nvm`).
 11. **Abre [http://localhost:3000](http://localhost:3000)** en tu navegador.
     ¡Ya tienes tu propia TaskFlow corriendo en tu ordenador!
 
+## Iniciar sesión con Microsoft (opcional)
+
+Además de email+contraseña, la pantalla de login puede mostrar un botón
+"Iniciar sesión con Microsoft" — útil si tu organización usa cuentas de
+Microsoft (Entra ID) y no quieres que cada persona tenga que registrarse
+con una contraseña nueva.
+
+**No tienes que registrar nada tú en Azure.** Pide a quien administre
+Entra ID en tu organización estos 3 valores y pégalos en tu `.env.local`:
+
+```
+AUTH_MICROSOFT_ENTRA_ID_ID=...
+AUTH_MICROSOFT_ENTRA_ID_SECRET=...
+AUTH_MICROSOFT_ENTRA_ID_ISSUER=...
+```
+
+El botón aparece solo cuando esos tres valores están rellenos — si los
+dejas en blanco, la app funciona exactamente igual que antes, solo con
+email+contraseña. (¿Eres tú quien administra Entra ID? La guía para
+configurarlo está en
+[`docs/microsoft-entra-id-setup.md`](docs/microsoft-entra-id-setup.md).)
+
 ## Cómo desplegarlo en Vercel
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fdavidalonsobadia%2Ftaskflow-vibecoding&project-name=taskflow&env=AUTH_SECRET,RESEND_API_KEY,RESEND_FROM_EMAIL&envDescription=Variables%20de%20entorno%20necesarias%20(DATABASE_URL%20la%20anade%20la%20integracion%20de%20Neon%20automaticamente))
@@ -235,3 +257,8 @@ olvidado ningún sitio, no para ir tú archivo por archivo.
   proyecto corriendo, o una ejecución anterior no se cerró bien. Cierra el
   proceso que lo esté usando, o arranca en otro puerto con
   `npm run dev -- -p 3001`.
+- **Al pulsar "Iniciar sesión con Microsoft" da un error `redirect_uri_mismatch`.**
+  La URL desde la que estás entrando (localhost o tu dominio de Vercel) no
+  está añadida como Redirect URI en la App Registration de Azure. Pídele a
+  quien administra Entra ID que la añada (ver
+  [`docs/microsoft-entra-id-setup.md`](docs/microsoft-entra-id-setup.md)).

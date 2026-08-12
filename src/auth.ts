@@ -6,11 +6,22 @@ import NextAuth, { type DefaultSession } from "next-auth";
 // augmentation below needs in order to merge into it.
 import "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
+import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 
 import { authConfig } from "./auth.config";
 import { db } from "./db";
 import { users } from "./db/schema";
 import { loginSchema } from "./lib/validations";
+
+// Microsoft Entra ID is entirely OPTIONAL: it's only added to `providers`
+// below when these are set, so a deployment that never configures it keeps
+// working with email+password only -- see docs/microsoft-entra-id-setup.md
+// for how an org admin registers the app in Azure and hands out these 3
+// values (this project never asks a student to open the Azure portal).
+const microsoftEntraIdEnabled = Boolean(
+  process.env.AUTH_MICROSOFT_ENTRA_ID_ID &&
+    process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
+);
 
 // Module augmentation: makes `session.user.id` (a string) and `token.id`
 // known to TypeScript everywhere in the app, instead of `any`.
@@ -58,6 +69,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
+        // A user created via Microsoft sign-in has no local password --
+        // there is nothing to compare against, so Credentials login must
+        // fail for them (they should use the "Sign in with Microsoft"
+        // button instead).
+        if (!user.hashedPassword) {
+          return null;
+        }
+
         const passwordsMatch = await compare(password, user.hashedPassword);
         if (!passwordsMatch) {
           return null;
@@ -70,12 +89,54 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         };
       },
     }),
+    // Only registered when an org admin has configured it (see the
+    // `microsoftEntraIdEnabled` check above). `issuer` restricts sign-in to
+    // one specific Entra tenant -- omitting it would default to "common"
+    // and let ANY Microsoft account in, which is not what we want here.
+    ...(microsoftEntraIdEnabled
+      ? [
+          MicrosoftEntraID({
+            clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
+            clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
+            issuer: process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER,
+          }),
+        ]
+      : []),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      // `user` is only defined right after sign-in; persist its id on the
-      // token so it survives on every subsequent request.
-      if (user) {
+    async jwt({ token, user, account }) {
+      // `user`/`account` are only defined right after sign-in.
+      if (user && account?.provider === "microsoft-entra-id") {
+        // There is no database adapter in this project (see CLAUDE.md), so
+        // Auth.js never creates a `users` row for an OAuth sign-in by
+        // itself -- `user.id` here is Microsoft's own identifier, not one
+        // of our integer primary keys. Find-or-create the local row by
+        // email so lists/tasks can reference a stable `users.id`, exactly
+        // like an email+password account.
+        if (!user.email) {
+          throw new Error(
+            "Microsoft did not return an email address for this account",
+          );
+        }
+        let dbUser = await db.query.users.findFirst({
+          where: eq(users.email, user.email),
+        });
+        if (!dbUser) {
+          [dbUser] = await db
+            .insert(users)
+            .values({
+              name: user.name ?? user.email,
+              email: user.email,
+              // Microsoft already verified this identity, and there is no
+              // local password to set.
+              isVerified: true,
+            })
+            .returning();
+        }
+        token.id = String(dbUser.id);
+      } else if (user) {
+        // Credentials sign-in: `user.id` is already our local `users.id`
+        // (see `authorize()` above).
         token.id = user.id as string;
       }
       return token;
